@@ -6,14 +6,43 @@ use ieee.numeric_std.all;
 Entity TOP_COM_port is
 Port(
     clk         : IN std_logic;
-    out_pin     : OUT std_logic_vector(7 downto 0)
+    Key         : IN std_logic;
+    LED         : OUT std_logic_vector(7 downto 0);
+    out_pin     : OUT std_logic
 );
 end TOP_COM_port;
 
 Architecture arch of TOP_COM_port is
-signal counter      : integer range 0 to 5 := 0;
+signal counter_big  : integer range 0 to 5 := 0;
+signal counter      : integer := 0;
 signal word         : string (1 to 5) := "hello";
 signal word_slv     : std_logic_vector(39 downto 0);
+signal flag         : std_logic;
+signal serial_clk   : std_logic := '1';
+signal Data         : std_logic_vector(7 downto 0);
+signal test         : std_logic_vector(21 downto 0);
+----------------------------------------------------------------------------
+component count_n_modul
+generic (n		: integer);
+port (
+	clk		: in std_logic;
+	reset	: in std_logic;
+	en		: in std_logic;
+    modul	: in std_logic_vector (n-1 downto 0);
+    qout	: out std_logic_vector (n-1 downto 0);
+    cout	: out std_logic);
+		
+end component;
+----------------------------------------------------------------------------
+component Serial
+Port(
+    clk                             : IN std_logic;
+    enable                          : IN std_logic;
+    Data_in                         : IN std_logic_vector(7 downto 0);
+    Data_out                        : OUT std_logic
+);
+end component;
+----------------------------------------------------------------------------
 ----------------------------------------------------------------------------
 function to_slv(str : string) return std_logic_vector is
   alias str_norm : string(str'length downto 1) is str;
@@ -26,31 +55,77 @@ begin
 return res_v;
 end function;
 ----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
 Begin
+----------------------------------------------------------------------------
+TXD : Serial
+    Port map(
+        clk             => serial_clk,
+        enable          => Key,
+        Data_in         => Data,
+        Data_out        => out_pin
+    );
+----------------------------------------------------------------------------
+counter_serial : count_n_modul
+    generic map(22)
+    Port map(
+        clk         => clk,
+        reset       => '0',
+        en          => '1',
+        modul       => "1001100010010110100000",
+        qout        => test,
+        cout        => flag        
+    );
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
+Process(clk)
+Begin
+    If rising_edge(clk) then
+        if counter = 50000000 then
+            counter <= 0;
+            counter_big <= counter_big + 1;
+        else
+            counter <= counter + 1;
+        end if;
+    end if;
+end process;
+----------------------------------------------------------------------------
+Process(flag)
+Begin
+    if rising_edge(flag) then
+        serial_clk <= not serial_clk;
+    end if;
+end process;
+----------------------------------------------------------------------------
 Process(clk)
 Begin
     if rising_edge(clk) then
-        word_slv <= to_slv(word);
-        case counter is
-            when 0 =>
-                counter <= counter + 1;
-                out_pin <= "00101010";
-            when 1 =>
-                out_pin <= word_slv(39 downto 32);
-                counter <= counter + 1;
-            when 2 =>
-                out_pin <= word_slv(31 downto 24);
-                counter <= counter + 1;
-            when 3 =>
-                out_pin <= word_slv(23 downto 16);
-                counter <= counter + 1;
-            when 4 =>
-                out_pin <= word_slv(15 downto 8);
-                counter <= counter + 1;
-            when 5 =>
-                out_pin <= word_slv(7 downto 0);
-                counter <= 0;
-        end case;
+        if key = '0' then
+            word_slv <= to_slv(word);
+            case counter_big is
+                when 0 =>
+                    Data <= "00101010";
+                when 1 =>
+                    Data <= word_slv(39 downto 32);
+                    LED <= "00000001";
+                when 2 =>
+                    Data <= word_slv(31 downto 24);
+                    LED <= "00000010";
+                when 3 =>
+                    Data <= word_slv(23 downto 16);
+                    LED <= "00000011";
+                when 4 =>
+                    Data <= word_slv(15 downto 8);
+                    LED <= "00000100";
+                when 5 =>
+                    Data <= word_slv(7 downto 0);
+                    LED <= "00000101";
+            end case;
+        else
+            LED <= "11111111";
+        end if;
     end if; 
 end process;
 end arch;
