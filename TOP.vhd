@@ -20,7 +20,7 @@ signal word_slv     : std_logic_vector(39 downto 0);
 signal flag         : std_logic;
 signal serial_clk   : std_logic := '1';
 signal Data         : std_logic_vector(7 downto 0);
-signal test         : std_logic_vector(21 downto 0);
+signal Tx_busy      : std_logic;
 ----------------------------------------------------------------------------
 component count_n_modul
 generic (n		: integer);
@@ -29,9 +29,7 @@ port (
 	reset	: in std_logic;
 	en		: in std_logic;
     modul	: in std_logic_vector (n-1 downto 0);
-    qout	: out std_logic_vector (n-1 downto 0);
     cout	: out std_logic);
-		
 end component;
 ----------------------------------------------------------------------------
 component Serial
@@ -39,6 +37,7 @@ Port(
     clk                             : IN std_logic;
     enable                          : IN std_logic;
     Data_in                         : IN std_logic_vector(7 downto 0);
+    Tx_busy                         : OUT std_logic;
     Data_out                        : OUT std_logic
 );
 end component;
@@ -65,32 +64,20 @@ TXD : Serial
         clk             => serial_clk,
         enable          => Key,
         Data_in         => Data,
-        Data_out        => out_pin
+        Data_out        => out_pin,
+        Tx_busy         => Tx_busy
     );
 ----------------------------------------------------------------------------
 counter_serial : count_n_modul
-    generic map(22)
+    generic map(12)
     Port map(
         clk         => clk,
         reset       => '0',
         en          => '1',
-        modul       => "1001100010010110100000",
-        qout        => test,
+        modul       => "101000101100",
         cout        => flag        
     );
 ----------------------------------------------------------------------------
-----------------------------------------------------------------------------
-Process(clk)
-Begin
-    If rising_edge(clk) then
-        if counter = 50000000 then
-            counter <= 0;
-            counter_big <= counter_big + 1;
-        else
-            counter <= counter + 1;
-        end if;
-    end if;
-end process;
 ----------------------------------------------------------------------------
 Process(flag)
 Begin
@@ -98,6 +85,32 @@ Begin
         serial_clk <= not serial_clk;
     end if;
 end process;
+----------------------------------------------------------------------------
+process(clk)
+Begin
+    If rising_edge(clk) then
+        if key = '0' and Tx_busy = '0' then
+            counter_big <= counter_big + 1;
+        elsif counter_big = 5 then
+            counter_big <= 0;
+        end if;
+    end if;
+end process;
+----------------------------------------------------------------------------
+-- Process(clk)
+-- Begin
+--     If rising_edge(clk) then
+--         if counter = 26041 then
+--             counter <= 0;
+--             counter_big <= counter_big + 1;
+--         else
+--             counter <= counter + 1;
+--         end if;
+--         If counter_big = 5 then
+--             counter_big <= 0;
+--         end if;
+--     end if;
+-- end process;
 ----------------------------------------------------------------------------
 Process(clk)
 Begin

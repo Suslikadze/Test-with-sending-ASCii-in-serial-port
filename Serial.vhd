@@ -8,6 +8,7 @@ Port(
     clk                             : IN std_logic;
     enable                          : IN std_logic;
     Data_in                         : IN std_logic_vector(7 downto 0);
+    Tx_busy                         : OUT std_logic;
     Data_out                        : OUT std_logic
 );
 End Serial;
@@ -29,9 +30,11 @@ Begin
             case state is
                 When idle =>
                     Data_out <= '1';
-                   -- if enable = '0' then
+                    Tx_busy <= '0';
+                    if enable = '0' then
                         state <= start_bit;
-                 --   end if;
+                        Tx_busy <= '1';
+                    end if;
                 When start_bit =>
                     Data_out <= '0';
                     state <= data_session;
