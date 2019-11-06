@@ -86,13 +86,15 @@ Begin
     end if;
 end process;
 ----------------------------------------------------------------------------
-process(clk)
+Process(serial_clk)
 Begin
-    If rising_edge(clk) then
-        if key = '0' and Tx_busy = '0' then
-            counter_big <= counter_big + 1;
-        elsif counter_big = 5 then
-            counter_big <= 0;
+    if rising_edge(serial_clk) then
+        if Tx_busy = '0' then
+            if counter_big /= 5 then
+                counter_big <= counter_big + 1;
+            else
+                counter_big <= 0;
+            end if;
         end if;
     end if;
 end process;

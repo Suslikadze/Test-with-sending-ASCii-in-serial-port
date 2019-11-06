@@ -17,7 +17,7 @@
 -- suit user's needs .Comments are provided in each section to help the user  
 -- fill out necessary details.                                                
 -- ***************************************************************************
--- Generated on "10/29/2019 10:28:14"
+-- Generated on "11/06/2019 11:23:04"
                                                             
 -- Vhdl Test Bench template for design  :  TOP_COM_port
 -- 
@@ -31,7 +31,7 @@ ENTITY TOP_COM_port_vhd_tst IS
 END TOP_COM_port_vhd_tst;
 ARCHITECTURE TOP_COM_port_arch OF TOP_COM_port_vhd_tst IS
 -- constants 
-constant clock_period : time := 10 ns;                                                
+constant clock_period : time := 10 ns;                                                 
 -- signals                                                   
 SIGNAL clk : STD_LOGIC;
 SIGNAL Key : STD_LOGIC;
@@ -61,8 +61,7 @@ BEGIN
 WAIT;                                                       
 END PROCESS init; 
 
-
- clock_process :process
+clock_process :process
    begin
   clk <= '0';
   wait for clock_period/2;
@@ -71,7 +70,7 @@ END PROCESS init;
    end process;
 
 key <= '0';
-	
+
 always : PROCESS                                              
 -- optional sensitivity list                                  
 -- (        )                                                 

@@ -14,13 +14,21 @@ Port(
 End Serial;
 ----------------------------------------------------------------------------
 Architecture arch of Serial is
-signal counter                      : integer range 0 to 7 := 0;
+signal counter                      : integer range 0 to 8 := 0;
 signal start_signal, stop_signal    : std_logic;
 type state_of_mashine is (idle, start_bit, data_session, end_bit);
-signal state                        : state_of_mashine := idle;
+signal state, pr_stage              : state_of_mashine := idle;
 ----------------------------------------------------------------------------
 Begin
-Process(clk)
+
+-- Process(clk)
+-- Begin
+--     If rising_edge(clk) then
+--         pr_stage <= state;
+--     end if;
+-- end Process;
+
+Process(clk, enable)
 Begin
     if rising_edge(clk) then
       --  if enable = '1' then
@@ -39,7 +47,7 @@ Begin
                     Data_out <= '0';
                     state <= data_session;
                 When data_session =>
-                    if counter /= 7 then
+                    if counter < 8 then
                         Data_out <= Data_in(7 - counter);
                         counter <= counter + 1;
                     else
@@ -48,6 +56,7 @@ Begin
                     end if;
                 When end_bit =>
                     Data_out <= '1';
+                    Tx_busy <= '0';
                     state <= idle;
                 -- when others =>
                 --     state <= idle;
