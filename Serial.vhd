@@ -48,7 +48,7 @@ Begin
                     state <= data_session;
                 When data_session =>
                     if counter < 8 then
-                        Data_out <= Data_in(7 - counter);
+                        Data_out <= Data_in(counter);
                         counter <= counter + 1;
                     else
                         counter <= 0;

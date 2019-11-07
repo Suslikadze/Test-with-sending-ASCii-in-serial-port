@@ -49,6 +49,7 @@ function to_slv(str : string) return std_logic_vector is
 begin
   for idx in str_norm'range loop
     res_v(8 * idx - 1 downto 8 * idx - 8) := 
+       -- std_logic_vector'value(str_norm(idx));
       std_logic_vector(to_unsigned(character'pos(str_norm(idx)), 8));
   end loop;
 return res_v;
@@ -118,24 +119,30 @@ Process(clk)
 Begin
     if rising_edge(clk) then
         if key = '0' then
-            word_slv <= to_slv(word);
+            word_slv <= std_logic'value(word);
+            --word_slv <= to_slv(word);
             case counter_big is
                 when 0 =>
                     Data <= "00101010";
                 when 1 =>
-                    Data <= word_slv(39 downto 32);
+                    --Data <= word_slv(39 downto 32);
+                    Data <= "00110001";
                     LED <= "00000001";
                 when 2 =>
-                    Data <= word_slv(31 downto 24);
+                    --Data <= word_slv(31 downto 24);
+                    Data <= "01001110";
                     LED <= "00000010";
                 when 3 =>
-                    Data <= word_slv(23 downto 16);
+                    Data <= "01010101";
+                    --Data <= word_slv(23 downto 16);
                     LED <= "00000011";
                 when 4 =>
-                    Data <= word_slv(15 downto 8);
+                    --Data <= word_slv(15 downto 8);
+                    Data <= "01010101";
                     LED <= "00000100";
                 when 5 =>
-                    Data <= word_slv(7 downto 0);
+                   -- Data <= word_slv(7 downto 0);
+                    Data <= "01011000";
                     LED <= "00000101";
             end case;
         else
